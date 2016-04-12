@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = ironic_ns_proxy
+omit = ironic_ns_proxy/openstack/*
+
+[report]
+ignore_errors = True
