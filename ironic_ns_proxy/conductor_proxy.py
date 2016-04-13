@@ -11,22 +11,22 @@
 # under the License.
 
 import socket
+import sys
 
 from ironic_ns_proxy import common
 
-IRONIC_IP = "104.130.159.134"
-IRONIC_PORT = 80
-
 
 class ConductorProxy(common.CommonService):
-    def __init__(self):
+    def __init__(self, ironic_ip, ironic_port):
+        self.ironic_ip = ironic_ip
+        self.ironic_port = ironic_port
         super(ConductorProxy, self).__init__('conductor_proxy')
 
     def request_handler(self, request):
         # Listen for response to UDP packet
         # Send response down the out socket
         tcpsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        tcpsocket.connect((IRONIC_IP, IRONIC_PORT))
+        tcpsocket.connect((self.ironic_ip, self.ironic_port))
         tcpsocket.send(request['data'])
 
         print("Request forwarded")
@@ -42,6 +42,6 @@ class ConductorProxy(common.CommonService):
         print("Response forwarded to agent")
 
 
-def main():
-    proxy = ConductorProxy()
+def main(args=sys.argv):
+    proxy = ConductorProxy(*args[1:])
     proxy.start()

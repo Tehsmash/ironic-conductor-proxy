@@ -11,23 +11,23 @@
 # under the License.
 
 import socket
+import sys
 
 from ironic_ns_proxy import common
-
-IRONIC_IP = "127.0.0.1"
-IRONIC_PORT = 69
 
 
 class TFTPProxy(common.CommonService):
 
-    def __init__(self):
+    def __init__(self, ironic_ip, ironic_port):
+        self.ironic_ip = ironic_ip
+        self.ironic_port = ironic_port
         super(TFTPProxy, self).__init__('tftp_proxy')
 
     def request_handler(self, request):
         udpsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udpsocket.bind(('', 0))
 
-        udpsocket.sendto(request['data'], (IRONIC_IP, IRONIC_PORT))
+        udpsocket.sendto(request['data'], (self.ironic_ip, self.ironic_port))
 
         data, addr = udpsocket.recvfrom(32768)
         udpsocket.close()
@@ -36,6 +36,6 @@ class TFTPProxy(common.CommonService):
             request['agent_uuid'], request['request_uuid'], data)
 
 
-def main():
-    proxy = TFTPProxy()
+def main(args=sys.argv):
+    proxy = TFTPProxy(*args[1:])
     proxy.start()
